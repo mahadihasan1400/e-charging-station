@@ -1,0 +1,91 @@
+package com.example.demo.controller;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+import com.example.demo.model.User;
+
+import dto.Owner;
+
+@Controller
+public class OwnerController {
+	
+
+	//https://e-charging-cs.herokuapp.com/saveOwner
+	//http://172.22.194.20:8080/saveOwner
+	@Autowired
+	private HttpSession httpSession;
+
+	@GetMapping("/owner-registration-forms")
+	public String viewOwnerRegistration() {
+		return "owner-registration";
+	}
+
+	@GetMapping("/owner")
+	public Object saveData(@RequestParam String name, String email, String pass) {
+		RestTemplate restTemplate = new RestTemplate();
+		String response = restTemplate.getForObject(
+				"https://e-charging-cs.herokuapp.com/saveOwner?name=" + name + "&email=" + email + "&pass=" + pass, String.class);
+		if("success".equals(response) )
+		return "redirect:/owner-sign-in-form";
+		else
+		return "redirect:/owner-registration-forms";
+
+		// RestTemplate restTemplate
+		// return new OwnerService(name, email, pass);
+
+	}
+
+	@GetMapping("/owner-sign-in-form")
+	public String viewUserSignInForm() {
+
+		return "owner-sign-in";
+	}
+
+	@GetMapping("/owner/email")
+	public String checkOwner(@RequestParam String email, Model model) {
+		RestTemplate restTemplate = new RestTemplate();
+		Owner response = restTemplate.getForObject("http://172.22.194.20:8080/loginOwner?email=" + email, Owner.class);
+
+		httpSession.setAttribute("ownerId", response.getId());
+		model.addAttribute("name", response.getName());
+
+		return "owner-dashboard";
+
+	}
+	
+	
+	
+	
+	@GetMapping("/charging-form")
+	public Object chargingForm() {
+		
+		
+		return "charging-add";
+
+
+	}
+	
+	
+	@GetMapping("/saveChargingStation")
+	public Object saveChargingStation(@RequestParam String city, String address, String price, String status) {
+		
+		String ownerId = (String) httpSession.getAttribute("ownerId");
+		RestTemplate restTemplate = new RestTemplate();
+		Object response = restTemplate.getForObject(
+				"http://172.22.194.20:8080/saveStation?city=" + city + "&address=" + address + "&price=" + price + "&status=" + status + "&id=" + ownerId, Object.class);
+		return "redirect:/owner-sign-in-form";
+
+
+	}
+
+}

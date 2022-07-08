@@ -1,0 +1,160 @@
+package com.example.demo.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
+
+import com.example.demo.model.Car;
+import com.example.demo.model.Employee;
+import com.example.demo.model.User;
+import com.example.demo.service.CarService;
+import com.example.demo.service.UserService;
+
+import dto.ChargingStation;
+import dto.Owner;
+
+import com.example.demo.repository.UserRepository;
+
+@Controller
+public class UserController {
+
+	@Autowired
+	private UserService userService;
+	@Autowired
+	UserRepository userRepository;
+	@Autowired
+	private HttpSession httpSession;
+	@Autowired
+	private CarService carService;
+
+	@GetMapping("/user-registration-form")
+	public String viewUserRegistration(Model model) {
+		User user = new User();
+		model.addAttribute("user", user);
+
+		return "user-registration";
+	}
+
+	@PostMapping("/saveUser")
+	public String saveUser(@ModelAttribute("user") User user) {
+		// save employee to database
+		userService.saveUser(user);
+		return "redirect:/user-sign-in-form";
+	}
+
+	@GetMapping("/user-sign-in-form")
+	public String viewUserSignInForm(Model model) {
+		User user = new User();
+		model.addAttribute("user", user);
+		return "user-sign-in";
+	}
+
+	@SuppressWarnings("unused")
+	@GetMapping("/user/email")
+	public String getUserByEmail(@RequestParam String email) {
+		String uEmail = null;
+		if (userRepository.findByEmailLike("%" + email + "%").isEmpty()) {
+
+			return "redirect:/user-sign-in";
+
+		}
+		uEmail = userRepository.findByEmailLike("%" + email + "%").get(0).getEmail();
+		httpSession.setAttribute("uEmail", uEmail);
+		httpSession.setAttribute("uId", userRepository.findByEmailLike("%" + email + "%").get(0).getId());
+		return "redirect:/user-dashboard";
+
+	}
+
+	@GetMapping("/user-dashboard")
+	public String userDashboard(Model model) {
+		User user = new User();
+
+		String pEmail = (String) httpSession.getAttribute("uEmail");
+		List<User> listUsers = userRepository.findByEmailLike("%" + pEmail + "%");
+		model.addAttribute("user", user);
+		model.addAttribute("listUsers", listUsers);
+
+		return "user-dashboard";
+	}
+
+	@GetMapping("/car-form")
+	public String viewCarAddForm(Model model) {
+		Car car = new Car();
+		model.addAttribute("car", car);
+		return "car-add";
+	}
+	
+	
+	
+	@GetMapping("/booking-station")
+	public String viewAllStation(Model model) {
+		
+		RestTemplate restTemplate = new RestTemplate();
+//		ChargingStation response = restTemplate.getForObject("https://e-charging-cs.herokuapp.com/listCS",
+//				ChargingStation.class);
+		
+		ResponseEntity<ChargingStation[]> response =
+				  restTemplate.getForEntity(
+				  "https://e-charging-cs.herokuapp.com/listCS",
+				  ChargingStation[].class);
+		ChargingStation[] chargingStations = response.getBody();
+		
+		
+		
+		model.addAttribute("chargingStations", chargingStations);
+		return "station-list";
+	}
+
+	@PostMapping("/saveCar")
+	public String saveCar(@ModelAttribute("car") Car car) {
+		
+		carService.saveCar(car);
+		int carId = (int) car.getId();
+		Long userId =  (Long) httpSession.getAttribute("uId");
+	
+		User  user = userService.getUserById(userId);
+		user.setCarId(""+ carId);
+		userService.saveUser(user);
+
+		
+		return "redirect:/car-list";
+	}
+	
+	
+	@GetMapping("/car-list")
+	public String carList(Model model) {
+		Long userId =  (Long) httpSession.getAttribute("uId");
+		
+		User  user = userService.getUserById(userId);
+		
+		Car  car = carService.getCarById(Long.parseLong(user.getCarId()));
+		model.addAttribute("car", car);
+		return "car-show";		
+	}
+
+
+	
+	
+//	@GetMapping("/user/email")
+//	public ResponseEntity<List<User>> getUserByEmail(@RequestParam String email) {
+//		
+//		return new ResponseEntity<List<User>>(userRepository.findByEmailLike("%" + email + "%"), HttpStatus.OK);
+//		
+//
+//	}
+
+}

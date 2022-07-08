@@ -1,0 +1,62 @@
+package com.example.demo.controller;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+import com.example.demo.model.User;
+
+import restservice.OwnerService;
+
+@Controller
+public class OwnerController {
+
+//	public String name = "zack";
+//	public String email = "z@gmail.com";
+//	public String pass = "123456";
+
+	@GetMapping("/owner-registration-forms")
+	public String viewOwnerRegistration() {
+		return "owner-registration";
+	}
+
+	@GetMapping("/owner")
+	public Object saveData(@RequestParam String name, String email, String pass) {
+			RestTemplate restTemplate = new RestTemplate();
+			Object response = restTemplate.getForObject("http://172.22.194.20:8080/saveOwner?name="+name+"&email="+email+"&pass="+pass,Object.class);
+			return "redirect:/owner-sign-in-form";
+			// RestTemplate restTemplate
+		//return new OwnerService(name, email, pass);
+
+	}
+	
+	@GetMapping("/owner-sign-in-form")
+	public String viewUserSignInForm() {
+
+		return "owner-sign-in";
+	}
+	
+	@GetMapping("/owner/email")
+	public String checkOwner(@RequestParam String email) {
+			RestTemplate restTemplate = new RestTemplate();
+			String response = restTemplate.getForObject("http://172.22.194.20:8080/loginOwner?email="+email,String.class);
+			return "redirect:/owner-sign-in-form";
+			// RestTemplate restTemplate
+		//return new OwnerService(name, email, pass);
+
+	}
+	
+	
+//	@GetMapping("/owner")
+//	public OwnerService saveData(@RequestParam String name, String email, String pass) {
+//			
+//		return new OwnerService(name, email, pass);
+//
+//	}
+
+}

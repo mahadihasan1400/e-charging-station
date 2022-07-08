@@ -1,27 +1,27 @@
 package com.example.demo.controller;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
 
 import com.example.demo.model.Car;
-import com.example.demo.model.Employee;
 import com.example.demo.model.User;
 import com.example.demo.service.CarService;
 import com.example.demo.service.UserService;
+
+import dto.ChargingStation;
+
 import com.example.demo.repository.UserRepository;
 
 @Controller
@@ -46,7 +46,6 @@ public class UserController {
 
 	@PostMapping("/saveUser")
 	public String saveUser(@ModelAttribute("user") User user) {
-		// save employee to database
 		userService.saveUser(user);
 		return "redirect:/user-sign-in-form";
 	}
@@ -92,6 +91,25 @@ public class UserController {
 		model.addAttribute("car", car);
 		return "car-add";
 	}
+	
+	
+	
+	@GetMapping("/booking-station")
+	public String viewAllStation(Model model) {
+		
+		RestTemplate restTemplate = new RestTemplate();
+	
+		ResponseEntity<ChargingStation[]> response =
+				  restTemplate.getForEntity(
+				  "https://e-charging-cs.herokuapp.com/listCS",
+				  ChargingStation[].class);
+		ChargingStation[] chargingStations = response.getBody();
+		
+		
+		
+		model.addAttribute("chargingStations", chargingStations);
+		return "station-list";
+	}
 
 	@PostMapping("/saveCar")
 	public String saveCar(@ModelAttribute("car") Car car) {
@@ -119,13 +137,5 @@ public class UserController {
 		model.addAttribute("car", car);
 		return "car-show";		
 	}
-
-//	@GetMapping("/user/email")
-//	public ResponseEntity<List<User>> getUserByEmail(@RequestParam String email) {
-//		
-//		return new ResponseEntity<List<User>>(userRepository.findByEmailLike("%" + email + "%"), HttpStatus.OK);
-//		
-//
-//	}
 
 }
