@@ -4446,3 +4446,7 @@ java.net.URISyntaxException: Illegal character in path at index 17: file:/D:/sof
 2022-07-08 12:48:54,206 [Worker-15: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
 2022-07-08 12:48:54,206 [Worker-15: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered properties files.
 2022-07-08 12:48:54,210 [Worker-15: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 1 resource
+2022-07-08 12:48:54,216 [Worker-15: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 41 resources
+2022-07-08 12:48:54,224 [Worker-15: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2022-07-08 12:48:54,224 [Worker-15: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered properties files.
+2022-07-08 12:48:54,224 [Worker-15: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Mahadi Hasan\Documents\workspace-spring-tool-suite-4-4.15.1.RELEASE\springboot-e-park\src\test\resources
